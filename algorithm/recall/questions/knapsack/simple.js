@@ -8,9 +8,10 @@
  */
 
 const packW = 10
-const w = [3, 5, 9, 4, 5]
+const w = [3, 5, 9, 4, 4]
 let result = null
 let maxW = -1
+const mem = [] // 备忘录 mem[i][j] 记录决策第 i 个物品时背包总重量为 j 的状态是否存在过
 /**
  *
  * @param {*} arr 已经放入的物品
@@ -27,7 +28,9 @@ function search(arr, currentW, k) {
     }
     return
   }
-
+  if (mem[k] && mem[k][currentW]) return
+  if (!mem[k]) mem[k] = []
+  mem[k][currentW] = true
   // 第 k 个不放进背包
   search(arr, currentW, k + 1)
 
