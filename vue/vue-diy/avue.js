@@ -1,9 +1,114 @@
+function def(obj, key, val, enumerable) {
+  Object.defineProperty(obj, key, {
+    value: val,
+    enumerable: !!enumerable,
+    writable: true,
+    configurable: true,
+  })
+}
+class Watcher {
+  constructor(vm, exp, updateFn) {
+    this.vm = vm
+    this.exp = exp
+    this.updateFn = updateFn
+
+    // 标记当前的 watcher
+    Dep.target = this
+    // 读一下当前key，触发依赖收集
+    vm.getVal(exp)
+    // 依赖完成后重置一下
+    Dep.target = null
+  }
+
+  // 未来会被dep调用
+  update() {
+    this.updateFn.call(this.vm, this.vm.getVal(this.exp))
+  }
+}
+class Dep {
+  constructor() {
+    this.deps = []
+  }
+
+  addDep(watcher) {
+    this.deps.push(watcher)
+  }
+
+  notify() {
+    this.deps.forEach((dep) => dep.update())
+  }
+}
+
+function defineReactive(obj, key, val) {
+  const dep = new Dep()
+  observe(val)
+  // 这里形成了一个闭包
+  // val这个内部变量会被外部访问到
+  Object.defineProperty(obj, key, {
+    get() {
+      if (Dep.target) {
+        dep.addDep(Dep.target)
+      }
+      return val
+    },
+    set(newVal) {
+      if (newVal !== val) {
+        val = newVal
+        observe(newVal)
+        dep.notify()
+      }
+    },
+  })
+}
+
+function observe(value) {
+  if (typeof value !== 'object' || value == null) {
+    return
+  }
+
+  // 创建Observer实例:以后出现一个对象，就会有一个Observer实例
+  return new Observer(value)
+}
+
+class Observer {
+  constructor(value) {
+    this.value = value
+    // 使用 defineProperty，避免 __ob__ 被遍历到
+    def(value, '__ob__', this)
+    this.walk(value)
+  }
+
+  walk(obj) {
+    Object.keys(obj).forEach((key) => {
+      defineReactive(obj, key, obj[key])
+    })
+  }
+}
+
+function proxy(vm) {
+  Object.keys(vm.$data).forEach((key) => {
+    Object.defineProperty(vm, key, {
+      get() {
+        return vm.$data[key]
+      },
+      set(val) {
+        vm.$data[key] = val
+      },
+    })
+  })
+}
+
 class AVue {
   constructor(options) {
     // 保存选项
     this.$options = options
     this.$data = options.data
     this.$methods = options.methods
+
+    observe(this.$data)
+
+    // 代理，使得访问 vm.a 时可以访问到 vm.$data.a
+    proxy(this)
 
     // 编译器
     new Compiler(options.el, this)
@@ -15,19 +120,6 @@ class AVue {
 
     // 归并取值
     return exp.reduce((prev, next) => {
-      return prev[next]
-    }, this.$data)
-  }
-
-  setVal(exp, newVal) {
-    exp = exp.split('.')
-    return exp.reduce((prev, next, currentIndex) => {
-      // 如果当前归并的为数组的最后一项，则将新值设置到该属性
-      if (currentIndex === exp.length - 1) {
-        return (prev[next] = newVal)
-      }
-
-      // 继续归并
       return prev[next]
     }, this.$data)
   }
@@ -95,6 +187,10 @@ class Compiler {
   update(node, exp, dir) {
     const fn = this[dir + 'Updater']
     fn && fn(node, this.$vm.getVal(exp))
+
+    new Watcher(this.$vm, exp, () => {
+      fn && fn(node, this.$vm.getVal(exp))
+    })
   }
 
   textUpdater(node, val) {
