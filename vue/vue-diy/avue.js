@@ -96,6 +96,14 @@ function proxy(vm) {
       },
     })
   })
+
+  Object.keys(vm.$methods).forEach((key) => {
+    Object.defineProperty(vm, key, {
+      get() {
+        return vm.$methods[key]
+      },
+    })
+  })
 }
 
 class AVue {
@@ -170,8 +178,15 @@ class Compiler {
         const dir = attrName.substring(2)
         // 看看是否存在对应方法，有则执行
         this[dir] && this[dir](node, exp)
+      } else if (attrName.indexOf('@') === 0) {
+        const dir = attrName.substring(1)
+        this[dir] && this[dir](node, exp)
       }
     })
+  }
+
+  click(node, exp) {
+    node.addEventListener('click', this.$vm[exp].bind(this.$vm))
   }
 
   // k-text
