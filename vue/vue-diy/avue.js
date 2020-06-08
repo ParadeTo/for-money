@@ -131,6 +131,15 @@ class AVue {
       return prev[next]
     }, this.$data)
   }
+
+  setVal(exp, val) {
+    exp.split('.').reduce((data, current, index, arr) => {
+      if (index === arr.length - 1) {
+        return (data[current] = val)
+      }
+      return data[current]
+    }, this.$data)
+  }
 }
 
 class Compiler {
@@ -189,6 +198,15 @@ class Compiler {
     node.addEventListener('click', this.$vm[exp].bind(this.$vm))
   }
 
+  // k-model
+  model(node, exp) {
+    this.update(node, exp, 'model')
+
+    node.addEventListener('input', (e) => {
+      this.$vm.setVal(exp, e.target.value)
+    })
+  }
+
   // k-text
   text(node, exp) {
     this.update(node, exp, 'text')
@@ -206,6 +224,10 @@ class Compiler {
     new Watcher(this.$vm, exp, () => {
       fn && fn(node, this.$vm.getVal(exp))
     })
+  }
+
+  modelUpdater(node, val) {
+    node.value = val
   }
 
   textUpdater(node, val) {
