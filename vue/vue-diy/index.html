@@ -7,17 +7,17 @@
   </head>
   <body>
     <div id="app">
-      <p a-text="counter"></p>
+      <p v-text="counter"></p>
       <p>{{obj.age}}</p>
-      <p a-html="desc"></p>
-      <input type="text" a-model="desc" />
+      <p v-html="desc"></p>
+      <input type="text" v-model="desc" />
       <button @click="resetDesc">重置 desc</button>
       <button @click="addProperty">新增属性</button>
     </div>
-    <script src="avue.js"></script>
+    <script src="./vue.js"></script>
     <script>
       const desc = '你好吗'
-      const app = new AVue({
+      const app = new Vue({
         el: '#app',
         data: {
           obj: {},

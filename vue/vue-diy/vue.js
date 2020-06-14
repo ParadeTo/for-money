@@ -41,13 +41,16 @@ class Dep {
 
 function defineReactive(obj, key, val) {
   const dep = new Dep()
-  observe(val)
+  const childOb = observe(val)
   // 这里形成了一个闭包
   // val这个内部变量会被外部访问到
   Object.defineProperty(obj, key, {
     get() {
       if (Dep.target) {
         dep.addDep(Dep.target)
+        if (childOb) {
+          childOb.dep.addDep(Dep.target)
+        }
       }
       return val
     },
@@ -72,6 +75,7 @@ function observe(value) {
 
 class Observer {
   constructor(value) {
+    this.dep = new Dep()
     this.value = value
     // 使用 defineProperty，避免 __ob__ 被遍历到
     def(value, '__ob__', this)
@@ -106,7 +110,7 @@ function proxy(vm) {
   })
 }
 
-class AVue {
+class Vue {
   constructor(options) {
     // 保存选项
     this.$options = options
@@ -120,6 +124,14 @@ class AVue {
 
     // 编译器
     new Compiler(options.el, this)
+  }
+
+  $set(target, propertyName, value) {
+    target[propertyName] = value
+    const ob = target.__ob__
+    defineReactive(ob.value, propertyName, value)
+    ob.dep.notify()
+    return value
   }
 
   getVal(exp) {
@@ -177,12 +189,12 @@ class Compiler {
 
   // 编译元素
   compileElement(node) {
-    // 处理元素上面的属性，典型的是a-，@开头的
+    // 处理元素上面的属性，典型的是v-，@开头的
     const attrs = node.attributes
     Array.from(attrs).forEach((attr) => {
       const attrName = attr.name
       const exp = attr.value
-      if (attrName.indexOf('a-') === 0) {
+      if (attrName.indexOf('v-') === 0) {
         // 截取指令名称
         const dir = attrName.substring(2)
         // 看看是否存在对应方法，有则执行

@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Vue Router</title>
+  </head>
+  <body>
+    <div id="demo">
+      <div>
+        <router-link to="/">Home</router-link> |
+        <router-link to="/about">About</router-link>
+      </div>
+      <router-view />
+    </div>
+    <script src="https://cdn.bootcdn.net/ajax/libs/vue/2.6.11/vue.js"></script>
+    <script src="./vue-router.js"></script>
+    <script>
+      const Home = Vue.component('home', {
+        template: '<div>Home</div>',
+      })
+      const About = Vue.component('about', {
+        template: '<div>About</div>',
+      })
+    </script>
+    <script>
+      Vue.use(VueRouter)
+
+      const routes = [
+        {
+          path: '/',
+          name: 'Home',
+          component: Home,
+        },
+        {
+          path: '/about',
+          name: 'About',
+          component: About,
+        },
+      ]
+
+      const router = new VueRouter({
+        routes,
+      })
+
+      const app = new Vue({
+        el: '#demo',
+        data: {
+          msg: 'hello',
+        },
+        router,
+      })
+    </script>
+  </body>
+</html>
