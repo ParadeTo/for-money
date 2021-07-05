@@ -1,3 +1,5 @@
+import {name} from './const'
+
 export default () => {
-  console.log("It's dd dddd dddd ddd ddd ddddd")
+  console.log(`It's ${name}`)
 }

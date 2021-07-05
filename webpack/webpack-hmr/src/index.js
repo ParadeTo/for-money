@@ -1,7 +1,7 @@
 import './client.js'
 var root = document.getElementById('root')
 var input = document.createElement('input')
-input.placeholder = '请输入手机号4'
+input.placeholder = '请输入手机号33443'
 document.body.appendChild(input)
 
 function render() {
@@ -10,7 +10,9 @@ function render() {
 render()
 
 if (module.hot) {
-  module.hot.accept(['./content.js'], () => {
+  debugger
+  module.hot.accept(() => {
+    debugger
     render()
   })
 }
