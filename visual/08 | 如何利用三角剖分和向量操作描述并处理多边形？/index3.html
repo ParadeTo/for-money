@@ -10,6 +10,7 @@
     <canvas width="800" height="600"></canvas>
     <script src="https://unpkg.com/earcut@2.2.2/dist/earcut.dev.js"></script>
     <script src="../vector2d.js"></script>
+    <script src="../utils.js"></script>
     <script>
       const canvas = document.querySelector('canvas')
       const gl = canvas.getContext('webgl')
@@ -19,7 +20,7 @@
 
         void main() {
           gl_PointSize = 10.0;
-          gl_Position = vec4(position, 1.0, 1.0);
+          gl_Position = vec4(position * 0.5, 1.0, 1.0);
         }
       `
 
@@ -45,30 +46,19 @@
       gl.linkProgram(program)
       gl.useProgram(program)
 
-      const vertices = [
-        [-0.7, 0.5],
-        [-0.4, 0.3],
-        [-0.25, 0.71],
-        [-0.1, 0.56],
-        [-0.1, 0.13],
-        [0.4, 0.21],
-        [0, -0.6],
-        [-0.3, -0.3],
-        [-0.6, -0.3],
-        [-0.45, 0.0],
-      ]
-
-      // const vertices = [
-      //   [1, 0],
-      //   [0, 1],
-      //   [-1, 0],
-      //   [0, -1],
-      //   // [0, -1],
-      // ]
-
-      const points = vertices.flat()
+      // 画椭圆
+      const ellipse = parametric(
+        (t, {x0, a}) => x0 + a * Math.cos(t),
+        (t, {y0, b}) => y0 + b * Math.sin(t)
+      )
+      let {points} = ellipse(0, Math.PI * 2, 100, {
+        x0: 0,
+        y0: 0,
+        a: 2,
+        b: 1,
+      })
+      points = points.flat()
       const triangles = earcut(points)
-
       const position = new Float32Array(points)
       const cells = new Uint16Array(triangles)
 
@@ -82,10 +72,8 @@
       gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, cellsBuffer)
       gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, cells, gl.STATIC_DRAW)
       gl.clear(gl.COLOR_BUFFER_BIT)
-      gl.drawElements(gl.POINTS, cells.length, gl.UNSIGNED_SHORT, 0)
-      // gl.drawElements(gl.LINE_STRIP, cells.length, gl.UNSIGNED_SHORT, 0)
-      // gl.drawElements(gl.TRIANGLE_STRIP, cells.length, gl.UNSIGNED_SHORT, 0)
-      gl.drawElements(gl.TRIANGLE_FAN, cells.length, gl.UNSIGNED_SHORT, 0)
+      // gl.drawElements(gl.POINTS, cells.length, gl.UNSIGNED_SHORT, 0)
+      gl.drawElements(gl.TRIANGLE_STRIP, cells.length, gl.UNSIGNED_SHORT, 0)
     </script>
   </body>
 </html>

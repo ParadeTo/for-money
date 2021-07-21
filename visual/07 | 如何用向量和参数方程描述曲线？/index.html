@@ -37,6 +37,7 @@
       function parametric(xFunc, yFunc) {
         return function (start, end, seg = 100, ...args) {
           const points = []
+          debugger
           for (let i = 0; i <= seg; i++) {
             const p = i / seg
             const t = start * (1 - p) + end * p
@@ -50,6 +51,12 @@
           }
         }
       }
+      // 画椭圆
+      const ellipse = parametric(
+        (t, {x0, a}) => x0 + a * Math.cos(t),
+        (t, {y0, b}) => y0 + b * Math.sin(t)
+      )
+      ellipse(0, Math.PI * 2, 100, {x0: 0, y0: 0, a: 200, b: 100}).draw(ctx)
       // 抛物线参数方程
       // const para = parametric(
       //   (t) => 25 * t,
@@ -100,19 +107,19 @@
           t ** 3 * y3
       )
 
-      const p0 = new Vector2D(0, 0)
-      const p1 = new Vector2D(100, 0)
-      p1.rotate(0.75)
-      const p2 = new Vector2D(150, 0)
-      p2.rotate(-0.75)
-      const p3 = new Vector2D(200, 0)
-      const count = 30
-      for (let i = 0; i < count; i++) {
-        p1.rotate((2 / count) * Math.PI)
-        p2.rotate((2 / count) * Math.PI)
-        p3.rotate((2 / count) * Math.PI)
-        cubicBezier(0, 1, 100, [p0, p1, p2, p3]).draw(ctx)
-      }
+      // const p0 = new Vector2D(0, 0)
+      // const p1 = new Vector2D(100, 0)
+      // p1.rotate(0.75)
+      // const p2 = new Vector2D(150, 0)
+      // p2.rotate(-0.75)
+      // const p3 = new Vector2D(200, 0)
+      // const count = 30
+      // for (let i = 0; i < count; i++) {
+      //   p1.rotate((2 / count) * Math.PI)
+      //   p2.rotate((2 / count) * Math.PI)
+      //   p3.rotate((2 / count) * Math.PI)
+      //   cubicBezier(0, 1, 100, [p0, p1, p2, p3]).draw(ctx)
+      // }
     </script>
   </body>
 </html>
