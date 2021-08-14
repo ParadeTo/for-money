@@ -1,12 +1,13 @@
-import {Button} from 'antd'
 import React from 'react'
-const env = import.meta.env
+import {Button} from 'antd'
+// import './index.less'
 
-export default function Index() {
+const Generate = () => {
   return (
     <div>
-      Index<Button type='primary'>Index</Button>
-      <div>{env.MODE}dd</div>
+      ddd<Button>ddd</Button>
     </div>
   )
 }
+
+export default Generate
